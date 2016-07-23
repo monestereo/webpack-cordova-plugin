@@ -3,7 +3,7 @@ var path = require('path');
 var optimist = require('optimist');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
-
+var ip = require('ip')
 
 function WebpackCordovaPlugin(options){
   this.options = options;
@@ -60,10 +60,11 @@ WebpackCordovaPlugin.prototype.apply  = function(compiler){
     /**
      * Replace config.xml <content src=...>
      */
-    if(compiler.options.reload){
-      var ip = compiler.options.reload === true? 'localhost':compiler.options.reload;
-      src = "http://" + ip + ":8080/" + src;
+
+    if(compiler.options.output.hotUpdateFunction === 'webpackHotUpdate'){
+      src = "http://" + ip.address() + ":8080/" + src;
     }
+    
     try {
       replace({
         regex: /<content +src="[^"]+\" *\/>/,
@@ -74,7 +75,8 @@ WebpackCordovaPlugin.prototype.apply  = function(compiler){
     } catch(err) {
       console.error('ERROR webpack-cordova-plugin: Could not replace content src in: '+config,err.code);
     }
-    
+
+
     /**
      * Replace config.xml version (if specified)
      */
